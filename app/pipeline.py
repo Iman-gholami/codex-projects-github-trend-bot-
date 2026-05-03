@@ -40,11 +40,14 @@ def run_daily_pipeline(settings: Settings) -> None:
 
     telegram = TelegramClient(settings.telegram_bot_token, settings.telegram_channel_id)
 
+    posted_count = 0
+
     for repo in selected:
         explanation = generate_technical_explanation(repo)
         telegram.send_message(format_message(repo, explanation))
         posted.add(repo.url)
+        save_posted_repos(settings.state_file, posted)
+        posted_count += 1
         logger.info("Posted repository: %s", repo.name)
 
-    save_posted_repos(settings.state_file, posted)
-    logger.info("Daily pipeline completed. Posted %d repositories", len(selected))
+    logger.info("Daily pipeline completed. Posted %d repositories", posted_count)
